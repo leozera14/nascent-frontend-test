@@ -1,16 +1,21 @@
 "use client";
 
 import { Asset } from "@/config/constants";
+import { Orderbook } from "../types";
 import { OrderbookRow } from "./OrderbookRow";
 import { SpreadIndicator } from "./SpreadIndicator";
-import { Orderbook } from "../types";
 
 interface OrderbookTableProps {
   orderbook: Orderbook;
   asset: Asset;
+  onPriceClick?: (price: number, side: "BUY" | "SELL") => void;
 }
 
-export function OrderbookTable({ orderbook, asset }: OrderbookTableProps) {
+export function OrderbookTable({
+  orderbook,
+  asset,
+  onPriceClick,
+}: OrderbookTableProps) {
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-800 text-sm font-medium text-gray-400">
@@ -28,6 +33,7 @@ export function OrderbookTable({ orderbook, asset }: OrderbookTableProps) {
             total={ask.total}
             depth={ask.depth}
             side="ask"
+            onPriceClick={onPriceClick}
           />
         ))}
       </div>
@@ -46,6 +52,7 @@ export function OrderbookTable({ orderbook, asset }: OrderbookTableProps) {
             total={bid.total}
             depth={bid.depth}
             side="bid"
+            onPriceClick={onPriceClick}
           />
         ))}
       </div>

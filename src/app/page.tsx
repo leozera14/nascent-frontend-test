@@ -8,6 +8,15 @@ import { OrderbookContainer } from "@/modules/overbook/components/OrderbookConta
 
 export default function TradingPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset>("BTC");
+  const [priceFromOrderbook, setPriceFromOrderbook] = useState<{
+    price: number;
+    side: "BUY" | "SELL";
+  } | null>(null);
+
+  const handlePriceClick = (price: number, side: "BUY" | "SELL") => {
+    setPriceFromOrderbook({ price, side });
+    setTimeout(() => setPriceFromOrderbook(null), 100);
+  };
 
   return (
     <main className="h-screen flex flex-col px-6 py-4 overflow-hidden">
@@ -30,11 +39,17 @@ export default function TradingPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
           <div className="lg:col-span-2 overflow-auto">
-            <OrderbookContainer asset={selectedAsset} />
+            <OrderbookContainer
+              asset={selectedAsset}
+              onPriceClick={handlePriceClick}
+            />
           </div>
 
           <div className="overflow-auto">
-            <TradingContainer asset={selectedAsset} />
+            <TradingContainer
+              asset={selectedAsset}
+              priceFromOrderbook={priceFromOrderbook}
+            />
           </div>
         </div>
       </div>

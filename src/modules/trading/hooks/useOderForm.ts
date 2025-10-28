@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Asset } from "@/config/constants";
 import { sendTrade } from "../lib";
-import { FormErrors, OrderFormState } from "../types";
+import { FormErrors, OrderFormState, OrderSide } from "../types";
 import { validateCurrentValue } from "../utils/validators";
 
 export function useOrderForm(asset: Asset) {
@@ -21,7 +21,6 @@ export function useOrderForm(asset: Asset) {
   const mutation = useMutation({
     mutationFn: sendTrade,
     onSuccess: () => {
-      // Reset form on success
       setFormState((prev) => ({
         side: prev.side,
         type: prev.type,
@@ -33,6 +32,8 @@ export function useOrderForm(asset: Asset) {
   });
 
   useEffect(() => {
+    if (formState.type !== "LIMIT") return;
+
     const price = parseFloat(formState.price);
     const quantity = parseFloat(formState.quantity);
 
@@ -63,6 +64,15 @@ export function useOrderForm(asset: Asset) {
     },
     [errors]
   );
+
+  const fillFromOrderbook = useCallback((price: number, side: OrderSide) => {
+    setFormState((prev) => ({
+      ...prev,
+      side,
+      type: "LIMIT",
+      price: price.toFixed(2),
+    }));
+  }, []);
 
   const validate = useCallback((): boolean => {
     const validations = {
@@ -102,6 +112,7 @@ export function useOrderForm(asset: Asset) {
     errors,
     isSubmitting: mutation.isPending,
     updateField,
+    fillFromOrderbook,
     submitOrder,
   };
 }

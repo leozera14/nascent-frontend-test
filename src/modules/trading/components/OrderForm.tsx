@@ -5,21 +5,51 @@ import { OrderTypeToggle } from "./OrderTypeToggle";
 import { isValidNumberInput } from "../utils/validators";
 import { useOrderForm } from "../hooks/useOderForm";
 import { toast } from "sonner";
+import { useEffect, useRef } from "react";
+import { OrderFormInput } from "./OrderFormInput";
 
 interface OrderFormProps {
   asset: Asset;
+  priceFromOrderbook?: { price: number; side: "BUY" | "SELL" } | null;
 }
 
-export function OrderForm({ asset }: OrderFormProps) {
-  const { formState, errors, isSubmitting, updateField, submitOrder } =
-    useOrderForm(asset);
+export function OrderForm({ asset, priceFromOrderbook }: OrderFormProps) {
+  const {
+    formState,
+    errors,
+    isSubmitting,
+    updateField,
+    fillFromOrderbook,
+    submitOrder,
+  } = useOrderForm(asset);
+
+  const priceInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (priceFromOrderbook) {
+      fillFromOrderbook(priceFromOrderbook.price, priceFromOrderbook.side);
+
+      if (priceInputRef.current) {
+        priceInputRef.current.classList.add("ring-2", "ring-blue-500");
+        setTimeout(() => {
+          priceInputRef.current?.classList.remove("ring-2", "ring-blue-500");
+        }, 1000);
+      }
+
+      toast.info("Price filled from Orderbook", {
+        description: `${
+          priceFromOrderbook.side
+        } at $${priceFromOrderbook.price.toFixed(2)}`,
+        duration: 2000,
+      });
+    }
+  }, [priceFromOrderbook, fillFromOrderbook]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       const response = await submitOrder();
-
       if (response) {
         toast.success("Order placed successfully!", {
           description: `Order ID: ${response.id}`,
@@ -85,72 +115,34 @@ export function OrderForm({ asset }: OrderFormProps) {
       </div>
 
       {formState.type === "LIMIT" && (
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
-            Price (USD)
-          </label>
-          <input
-            type="text"
-            value={formState.price}
-            onChange={(e) => handleNumberInput("price", e.target.value)}
-            placeholder="0.00"
-            className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
-              errors.price
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-700 focus:ring-blue-500"
-            }`}
-          />
-          {errors.price && (
-            <p className="mt-1 text-sm text-red-400">{errors.price}</p>
-          )}
-        </div>
+        <OrderFormInput
+          ref={priceInputRef}
+          label="Price (USD)"
+          value={formState.price}
+          onChange={(value) => handleNumberInput("price", value)}
+          error={errors.price}
+        />
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
-          Amount ({asset})
-        </label>
-        <input
-          type="text"
-          value={formState.quantity}
-          onChange={(e) => handleNumberInput("quantity", e.target.value)}
-          placeholder="0.00"
-          className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
-            errors.quantity
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-700 focus:ring-blue-500"
-          }`}
-        />
-        {errors.quantity && (
-          <p className="mt-1 text-sm text-red-400">{errors.quantity}</p>
-        )}
-      </div>
+      <OrderFormInput
+        label={`Amount (${asset})`}
+        value={formState.quantity}
+        onChange={(value) => handleNumberInput("quantity", value)}
+        error={errors.quantity}
+      />
 
-      <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
-          Total (USD)
-        </label>
-        <input
-          type="text"
-          value={formState.notional}
-          onChange={(e) => handleNumberInput("notional", e.target.value)}
-          placeholder="0.00"
-          className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
-            errors.notional
-              ? "border-red-500 focus:ring-red-500"
-              : "border-gray-700 focus:ring-blue-500"
-          }`}
-          disabled={formState.type === "LIMIT"}
-        />
-        {errors.notional && (
-          <p className="mt-1 text-sm text-red-400">{errors.notional}</p>
-        )}
-        {formState.type === "LIMIT" && (
-          <p className="mt-1 text-xs text-gray-500">
-            Auto-calculated from price × amount
-          </p>
-        )}
-      </div>
+      <OrderFormInput
+        label="Total (USD)"
+        value={formState.notional}
+        onChange={(value) => handleNumberInput("notional", value)}
+        error={errors.notional}
+        disabled={formState.type === "LIMIT"}
+        helperText={
+          formState.type === "LIMIT"
+            ? "Auto-calculated from price × amount"
+            : "Enter the total USD amount you want to trade"
+        }
+      />
 
       <button
         type="submit"
@@ -163,22 +155,7 @@ export function OrderForm({ asset }: OrderFormProps) {
       >
         {isSubmitting ? (
           <span className="flex items-center justify-center gap-2">
-            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-                fill="none"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+            <SubmitOrderAnimation />
             Placing Order...
           </span>
         ) : (
@@ -186,5 +163,26 @@ export function OrderForm({ asset }: OrderFormProps) {
         )}
       </button>
     </form>
+  );
+}
+
+function SubmitOrderAnimation() {
+  return (
+    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
   );
 }
