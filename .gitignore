@@ -1,29 +1,24 @@
-# Dependencies
-node_modules/
+# dependencies
+/node_modules
 
-# Next.js
+# next.js
 /.next/
 /out/
-.next
-out
 
-# Production
+# production
 /build
-/dist
 
-# Misc
+# misc
 .DS_Store
 *.pem
 
-# Debug
+# debug
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Local env files
-.env
+# local env files
 .env*.local
 
-# Vercel
+# vercel
 .vercel
-
-# TypeScript
-next-env.d.ts
