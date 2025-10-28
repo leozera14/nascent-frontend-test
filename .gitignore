@@ -11,6 +11,10 @@ out
 /build
 /dist
 
+# Misc
+.DS_Store
+*.pem
+
 # Debug
 npm-debug.log*
 
