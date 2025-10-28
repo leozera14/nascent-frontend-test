@@ -2,17 +2,31 @@
 
 import { useState } from "react";
 import { Asset } from "@/config/constants";
-import { useOrderbook } from "@/modules/overbook/hooks/useOrderbook";
-import { OrderbookTable } from "@/modules/overbook/components/OrderbookTable";
+import { TradingContainer } from "@/modules/trading/components/TradingContainer";
+import { AssetSelector } from "./_components/AssetSelector";
+import { OrderbookContainer } from "@/modules/overbook/components/OrderbookContainer";
 
 export default function TradingPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset>("BTC");
-  const { orderbook, loading, error } = useOrderbook(selectedAsset);
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const handleSuccess = (message: string) => {
+    setNotification({ type: "success", message });
+    setTimeout(() => setNotification(null), 5000);
+  };
+
+  const handleError = (message: string) => {
+    setNotification({ type: "error", message });
+    setTimeout(() => setNotification(null), 5000);
+  };
 
   return (
-    <main className="min-h-screen p-6">
+    <main className="min-h-screen px-6 py-1 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
+        <header className="flex flex-col items-center justify-center">
           <h1 className="text-3xl font-bold text-white mb-2">
             Crypto Trading Platform
           </h1>
@@ -21,57 +35,35 @@ export default function TradingPage() {
           </p>
         </header>
 
-        <div className="mb-6 flex gap-2">
-          <button
-            onClick={() => setSelectedAsset("BTC")}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              selectedAsset === "BTC"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
+        {notification && (
+          <div
+            className={`mb-6 p-4 rounded-lg ${
+              notification.type === "success"
+                ? "bg-green-500/10 border border-green-500 text-green-400"
+                : "bg-red-500/10 border border-red-500 text-red-400"
             }`}
           >
-            Bitcoin
-          </button>
-          <button
-            onClick={() => setSelectedAsset("ETH")}
-            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-              selectedAsset === "ETH"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-            }`}
-          >
-            Ethereum
-          </button>
+            {notification.message}
+          </div>
+        )}
+
+        <div className="py-4 flex items-center justify-center">
+          <AssetSelector
+            selectedAsset={selectedAsset}
+            onAssetChange={setSelectedAsset}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-gray-900 rounded-lg p-6 border border-gray-800">
-            <h2 className="text-xl font-semibold mb-4">Order Book</h2>
-
-            {loading && (
-              <div className="text-center py-12">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent"></div>
-                <p className="mt-4 text-gray-500">Loading orderbook...</p>
-              </div>
-            )}
-
-            {error && (
-              <div className="text-center py-12">
-                <p className="text-red-400">{error}</p>
-              </div>
-            )}
-
-            {orderbook && !loading && !error && (
-              <OrderbookTable orderbook={orderbook} asset={selectedAsset} />
-            )}
+          <div className="lg:col-span-2">
+            <OrderbookContainer asset={selectedAsset} />
           </div>
 
-          <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
-            <h2 className="text-xl font-semibold mb-4">Place Order</h2>
-            <p className="text-gray-600 text-center py-8">
-              Order form will be loaded here...
-            </p>
-          </div>
+          <TradingContainer
+            asset={selectedAsset}
+            onSuccess={handleSuccess}
+            onError={handleError}
+          />
         </div>
       </div>
     </main>
