@@ -1,6 +1,6 @@
 "use client";
 
-import { OrderType } from "../types";
+import { OrderType } from "../../types";
 
 interface OrderTypeToggleProps {
   value: OrderType;
@@ -13,7 +13,7 @@ export function OrderTypeToggle({ value, onChange }: OrderTypeToggleProps) {
       <button
         type="button"
         onClick={() => onChange("LIMIT")}
-        className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+        className={`flex-1 px-4 py-1 rounded-md font-medium transition-colors ${
           value === "LIMIT"
             ? "bg-gray-700 text-white"
             : "text-gray-400 hover:text-gray-300"
@@ -24,7 +24,7 @@ export function OrderTypeToggle({ value, onChange }: OrderTypeToggleProps) {
       <button
         type="button"
         onClick={() => onChange("MARKET")}
-        className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
+        className={`flex-1 px-4 py-1 rounded-md font-medium transition-colors ${
           value === "MARKET"
             ? "bg-gray-700 text-white"
             : "text-gray-400 hover:text-gray-300"

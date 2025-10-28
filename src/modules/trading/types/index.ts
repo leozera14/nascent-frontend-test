@@ -30,3 +30,15 @@ export interface FormErrors {
   quantity?: string;
   notional?: string;
 }
+
+export interface Trade {
+  id: string;
+  asset: Asset;
+  side: OrderSide;
+  type: OrderType;
+  price?: number;
+  quantity: number;
+  notional: number;
+  timestamp: number;
+  status: "completed" | "pending" | "failed";
+}

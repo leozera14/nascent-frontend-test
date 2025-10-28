@@ -4,10 +4,13 @@ import { useState, useCallback, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Asset } from "@/config/constants";
 import { sendTrade } from "../lib";
-import { FormErrors, OrderFormState, OrderSide } from "../types";
+import { FormErrors, OrderFormState, OrderSide, Trade } from "../types";
 import { validateCurrentValue } from "../utils/validators";
+import { useTrades } from "../context/TradesContext";
 
 export function useOrderForm(asset: Asset) {
+  const { addTrade } = useTrades();
+
   const [formState, setFormState] = useState<OrderFormState>({
     side: "BUY",
     type: "LIMIT",
@@ -20,7 +23,22 @@ export function useOrderForm(asset: Asset) {
 
   const mutation = useMutation({
     mutationFn: sendTrade,
-    onSuccess: () => {
+    onSuccess: (response) => {
+      const trade: Trade = {
+        id: response.id,
+        asset,
+        side: formState.side,
+        type: formState.type,
+        price:
+          formState.type === "LIMIT" ? parseFloat(formState.price) : undefined,
+        quantity: parseFloat(formState.quantity),
+        notional: parseFloat(formState.notional),
+        timestamp: Date.now(),
+        status: "completed",
+      };
+
+      addTrade(trade);
+
       setFormState((prev) => ({
         side: prev.side,
         type: prev.type,
