@@ -3,7 +3,7 @@ import { Orderbook, OrderbookResponse } from "../types";
 
 export const getOrderbook = async (asset: Asset): Promise<Orderbook> => {
   try {
-    const response = await fetch(`${BASE_API_URL}/orderbook/${asset}`, {
+    const response = await fetch(`${BASE_API_URL}/orderbook?asset=${asset}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -18,7 +18,6 @@ export const getOrderbook = async (asset: Asset): Promise<Orderbook> => {
 
     const data: OrderbookResponse = await response.json();
 
-    // Process the data
     return processOrderbookData(data);
   } catch (error) {
     console.error("Error fetching orderbook:", error);
