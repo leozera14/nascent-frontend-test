@@ -1,3 +1,5 @@
+export const BASE_API_URL = process.env.NEXT_PUBLIC_API_URL || "/api"; // fallback for prod
+
 // Supported Assets
 export const ASSETS = ["BTC", "ETH"] as const;
 export type Asset = (typeof ASSETS)[number];

@@ -1,10 +1,11 @@
+import { BASE_API_URL } from "@/config/constants";
 import { TradeRequest, TradeResponse } from "../types";
 
 export const sendTrade = async (
   tradeData: TradeRequest
 ): Promise<TradeResponse> => {
   try {
-    const response = await fetch("/trade", {
+    const response = await fetch(`${BASE_API_URL}/trade`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

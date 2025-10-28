@@ -1,8 +1,7 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "/http://localhost:3001/api";
+import { BASE_API_URL } from "@/config/constants";
 
 export async function fetchOrderbook(asset: string) {
-  const response = await fetch(`${API_BASE_URL}/orderbook?asset=${asset}`);
+  const response = await fetch(`${BASE_API_URL}/orderbook?asset=${asset}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch orderbook");
@@ -12,7 +11,7 @@ export async function fetchOrderbook(asset: string) {
 }
 
 export async function sendTrade(tradeData: any) {
-  const response = await fetch(`${API_BASE_URL}/trade`, {
+  const response = await fetch(`${BASE_API_URL}/trade`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

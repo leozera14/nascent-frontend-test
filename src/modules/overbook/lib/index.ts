@@ -1,9 +1,9 @@
-import { Asset } from "@/config/constants";
+import { Asset, BASE_API_URL } from "@/config/constants";
 import { Orderbook, OrderbookResponse } from "../types";
 
 export const getOrderbook = async (asset: Asset): Promise<Orderbook> => {
   try {
-    const response = await fetch(`/orderbook/${asset}`, {
+    const response = await fetch(`${BASE_API_URL}/orderbook/${asset}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
