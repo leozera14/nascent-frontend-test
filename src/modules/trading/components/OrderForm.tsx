@@ -4,14 +4,13 @@ import { Asset } from "@/config/constants";
 import { OrderTypeToggle } from "./OrderTypeToggle";
 import { isValidNumberInput } from "../utils/validators";
 import { useOrderForm } from "../hooks/useOderForm";
+import { toast } from "sonner";
 
 interface OrderFormProps {
   asset: Asset;
-  onSuccess?: (message: string) => void;
-  onError?: (message: string) => void;
 }
 
-export function OrderForm({ asset, onSuccess, onError }: OrderFormProps) {
+export function OrderForm({ asset }: OrderFormProps) {
   const { formState, errors, isSubmitting, updateField, submitOrder } =
     useOrderForm(asset);
 
@@ -20,13 +19,17 @@ export function OrderForm({ asset, onSuccess, onError }: OrderFormProps) {
 
     try {
       const response = await submitOrder();
+
       if (response) {
-        onSuccess?.(`Order placed successfully! ID: ${response.id}`);
+        toast.success("Order placed successfully!", {
+          description: `Order ID: ${response.id}`,
+        });
       }
     } catch (error) {
-      onError?.(
-        error instanceof Error ? error.message : "Failed to place order"
-      );
+      toast.error("Failed to place order", {
+        description:
+          error instanceof Error ? error.message : "Please try again",
+      });
     }
   };
 
@@ -158,7 +161,29 @@ export function OrderForm({ asset, onSuccess, onError }: OrderFormProps) {
             : "bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white"
         }`}
       >
-        {isSubmitting ? "Placing Order..." : `${formState.side} ${asset}`}
+        {isSubmitting ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            Placing Order...
+          </span>
+        ) : (
+          `${formState.side} ${asset}`
+        )}
       </button>
     </form>
   );

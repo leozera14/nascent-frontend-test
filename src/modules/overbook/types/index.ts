@@ -8,6 +8,7 @@ export interface OrderbookEntry {
   price: number;
   quantity: number;
   total: number;
+  depth: number;
 }
 
 export interface Orderbook {

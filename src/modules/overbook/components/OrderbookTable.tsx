@@ -11,45 +11,41 @@ interface OrderbookTableProps {
 }
 
 export function OrderbookTable({ orderbook, asset }: OrderbookTableProps) {
-  const { bids, asks, spread, spreadPercentage } = orderbook;
-
-  const maxBidTotal = bids.length > 0 ? bids[bids.length - 1].total : 0;
-  const maxAskTotal = asks.length > 0 ? asks[asks.length - 1].total : 0;
-
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-2 px-3 py-2 text-xs font-semibold text-gray-500 border-b border-gray-800">
-        <span>Price (USD)</span>
-        <span className="text-right">Amount ({asset})</span>
-        <span className="text-right">Total</span>
+    <div className="space-y-2">
+      <div className="grid grid-cols-3 gap-4 pb-2 border-b border-gray-800 text-sm font-medium text-gray-400">
+        <div>Price (USD)</div>
+        <div className="text-right">Amount ({asset})</div>
+        <div className="text-right">Total (USD)</div>
       </div>
 
-      <div className="space-y-px custom-scroll max-h-[300px] overflow-y-auto">
-        {[...asks].reverse().map((ask, index) => (
+      <div className="space-y-1">
+        {[...orderbook.asks].reverse().map((ask, index) => (
           <OrderbookRow
             key={`ask-${index}`}
             price={ask.price}
             quantity={ask.quantity}
             total={ask.total}
-            asset={asset}
+            depth={ask.depth}
             side="ask"
-            maxTotal={maxAskTotal}
           />
         ))}
       </div>
 
-      <SpreadIndicator spread={spread} spreadPercentage={spreadPercentage} />
+      <SpreadIndicator
+        spread={orderbook.spread}
+        spreadPercentage={orderbook.spreadPercentage}
+      />
 
-      <div className="space-y-px custom-scroll max-h-[300px] overflow-y-auto">
-        {bids.map((bid, index) => (
+      <div className="space-y-1">
+        {orderbook.bids.map((bid, index) => (
           <OrderbookRow
             key={`bid-${index}`}
             price={bid.price}
             quantity={bid.quantity}
             total={bid.total}
-            asset={asset}
+            depth={bid.depth}
             side="bid"
-            maxTotal={maxBidTotal}
           />
         ))}
       </div>

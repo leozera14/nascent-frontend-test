@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Asset } from "@/config/constants";
 import { sendTrade } from "../lib";
 import { FormErrors, OrderFormState } from "../types";
@@ -16,7 +17,20 @@ export function useOrderForm(asset: Asset) {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: sendTrade,
+    onSuccess: () => {
+      // Reset form on success
+      setFormState((prev) => ({
+        side: prev.side,
+        type: prev.type,
+        price: "",
+        quantity: "",
+        notional: "",
+      }));
+    },
+  });
 
   useEffect(() => {
     const price = parseFloat(formState.price);
@@ -36,9 +50,8 @@ export function useOrderForm(asset: Asset) {
     }
 
     const notional = (price * quantity).toFixed(2);
-
     setFormState((prev) => ({ ...prev, notional }));
-  }, [formState.price, formState.quantity]);
+  }, [formState.price, formState.quantity, formState.notional]);
 
   const updateField = useCallback(
     (field: keyof OrderFormState, value: string) => {
@@ -71,41 +84,23 @@ export function useOrderForm(asset: Asset) {
   const submitOrder = useCallback(async () => {
     if (!validate()) return null;
 
-    setIsSubmitting(true);
+    const tradeData = {
+      asset,
+      side: formState.side,
+      type: formState.type,
+      quantity: parseFloat(formState.quantity),
+      price:
+        formState.type === "LIMIT" ? parseFloat(formState.price) : undefined,
+      notional: parseFloat(formState.notional),
+    };
 
-    try {
-      const tradeData = {
-        asset,
-        side: formState.side,
-        type: formState.type,
-        quantity: parseFloat(formState.quantity),
-        price:
-          formState.type === "LIMIT" ? parseFloat(formState.price) : undefined,
-        notional: parseFloat(formState.notional),
-      };
-
-      const response = await sendTrade(tradeData);
-
-      setFormState({
-        side: formState.side,
-        type: formState.type,
-        price: "",
-        quantity: "",
-        notional: "",
-      });
-
-      return response;
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [asset, formState, validate]);
+    return mutation.mutateAsync(tradeData);
+  }, [asset, formState, validate, mutation]);
 
   return {
     formState,
     errors,
-    isSubmitting,
+    isSubmitting: mutation.isPending,
     updateField,
     submitOrder,
   };

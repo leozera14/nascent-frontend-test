@@ -8,25 +8,11 @@ import { OrderbookContainer } from "@/modules/overbook/components/OrderbookConta
 
 export default function TradingPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset>("BTC");
-  const [notification, setNotification] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
-
-  const handleSuccess = (message: string) => {
-    setNotification({ type: "success", message });
-    setTimeout(() => setNotification(null), 5000);
-  };
-
-  const handleError = (message: string) => {
-    setNotification({ type: "error", message });
-    setTimeout(() => setNotification(null), 5000);
-  };
 
   return (
-    <main className="min-h-screen px-6 py-1 overflow-hidden">
-      <div className="max-w-7xl mx-auto">
-        <header className="flex flex-col items-center justify-center">
+    <main className="h-screen flex flex-col px-6 py-4 overflow-hidden">
+      <div className="max-w-7xl mx-auto w-full flex flex-col h-full">
+        <header className="flex flex-col items-center justify-center mb-4">
           <h1 className="text-3xl font-bold text-white mb-2">
             Crypto Trading Platform
           </h1>
@@ -35,35 +21,21 @@ export default function TradingPage() {
           </p>
         </header>
 
-        {notification && (
-          <div
-            className={`mb-6 p-4 rounded-lg ${
-              notification.type === "success"
-                ? "bg-green-500/10 border border-green-500 text-green-400"
-                : "bg-red-500/10 border border-red-500 text-red-400"
-            }`}
-          >
-            {notification.message}
-          </div>
-        )}
-
-        <div className="py-4 flex items-center justify-center">
+        <div className="flex items-center justify-center mb-4">
           <AssetSelector
             selectedAsset={selectedAsset}
             onAssetChange={setSelectedAsset}
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0">
+          <div className="lg:col-span-2 overflow-auto">
             <OrderbookContainer asset={selectedAsset} />
           </div>
 
-          <TradingContainer
-            asset={selectedAsset}
-            onSuccess={handleSuccess}
-            onError={handleError}
-          />
+          <div className="overflow-auto">
+            <TradingContainer asset={selectedAsset} />
+          </div>
         </div>
       </div>
     </main>
